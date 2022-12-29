@@ -1,17 +1,34 @@
 import requests
 import threading
 import time
+import logging
 
-text = input("give text: ")
-url = "https://ngl.link/[PUT USERNAME]"
+logging.basicConfig(level=logging.ERROR)
 
-param = {
-    'question': text
-    }
+def send_request(session, text):
+    """Sends a POST request with the given text as the question parameter."""
+    url = "https://ngl.link/[PUT USERNAME]"
+    params = {'question': text}
+    try:
+        session.post(url, data=params)
+    except Exception as e:
+        logging.error(e)
 
-while True:
-    requests.post(url, data=param)
+def main():
+    # Create a session object to be used for all requests
+    session = requests.Session()
+
     text = input("give text: ")
-    time.sleep(0.6)
+    while text:
+        # Send the request in a new thread
+        thread = threading.Thread(target=send_request, args=(session, text))
+        thread.start()
 
+        # Get the next input from the user
+        text = input("give text: ")
 
+        # Add a delay between requests to avoid overloading the server
+        time.sleep(0.6)
+
+if __name__ == "__main__":
+    main()
